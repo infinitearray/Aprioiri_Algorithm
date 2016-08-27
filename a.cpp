@@ -20,6 +20,7 @@ vector<string> split(const string &s, char delim) {
 }
 
 vector< vector<string> > Input; //The main Input dataset
+vector< vector<int> > Dataset;  //The hashed dataset
 vector<string> items;
 
 int main()
@@ -67,15 +68,23 @@ int main()
       cout << "Unable to open input file\n";
     for(int i=0;i<Input.size();i++)
     {
+      vector<int> temp;
+      Dataset.push_back(temp);
       for(int j=0;j<Input[i].size();j++)
       {
-        cout << Input[i][j] << " ";
+        Dataset[i].push_back(0);
+        for(int k=0;k<items.size();k++)
+        {
+          if(Input[i][j]==items[k])
+          {
+              Dataset[i][j]+=k;
+              break;
+          }
+        }
+        cout << Dataset[i][j] << " ";
       }
       cout << "\n";
     }
-    cout << "ITEMS---\n";
-    for(int i=0;i<items.size();i++)
-      cout << items[i] << "\n";
   }
   else
     cout << "Unable to open config file\n";
