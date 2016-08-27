@@ -19,7 +19,8 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-vector< vector<string> > Input;
+vector< vector<string> > Input; //The main Input dataset
+vector<string> items;
 
 int main()
 {
@@ -52,9 +53,13 @@ int main()
     {
       while(getline(inputfile, line))
       {
-        lines.erase(lines.begin(), lines.end());
         lines = split(line, ',');
         Input.push_back(lines);
+        for(int i=0;i<lines.size();i++)
+        {
+          if (find(items.begin(), items.end(), lines[i]) == items.end())
+            items.push_back(lines[i]);
+        }
         lines.clear();
       }
     }
@@ -68,6 +73,9 @@ int main()
       }
       cout << "\n";
     }
+    cout << "ITEMS---\n";
+    for(int i=0;i<items.size();i++)
+      cout << items[i] << "\n";
   }
   else
     cout << "Unable to open config file\n";
