@@ -46,7 +46,7 @@ int main()
       i++;
     }
     myfile.close();
-    ifstream inputfile("input.csv");
+    ifstream inputfile(input.c_str());
     if(inputfile.is_open())
     {
       while(getline(inputfile, line))
