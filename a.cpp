@@ -19,6 +19,7 @@ vector<string> split(const string &s, char delim) {
 vector< vector<string> > Input; //The main Input dataset
 vector< vector<int> > Dataset;  //The hashed dataset
 vector<string> items;
+vector<int> result;
 
 int main()
 {
@@ -46,7 +47,8 @@ int main()
       i++;
     }
     myfile.close();
-    ifstream inputfile(input.c_str());
+    //ifstream inputfile(input.c_str());
+    ifstream inputfile("TextbookInput.csv");
     if(inputfile.is_open())
     {
       while(getline(inputfile, line))
@@ -91,13 +93,46 @@ int main()
       }
     }
     cout << "support-->" << support*Dataset.size() << "\n";
+    float mincount=(float)support*Dataset.size();
     for(int i=0;i<items.size();i++)
     {
       //cout << count[i] << " ";
-      if((float)count[i]>(float)support*Dataset.size())
-        cout << i << " ";
+      if((float)count[i]>=(float)support*Dataset.size())
+      {
+        cout << items[i] << " ";
+        result.push_back(i);
+      }
     }
     cout << "\n";
+    int second[result.size()+1][result.size()+1]={0};
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=0;j<result.size();j++)
+      {
+        second[i][j]=0;
+      }
+    }
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=i+1;j<result.size();j++)
+      {
+        for(int k=0;k<Dataset.size();k++)
+        {
+          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          {
+            second[i][j]++;
+          }
+        }
+      }
+    }
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=0;j<result.size();j++)
+      {
+        if(second[i][j]>=mincount )
+          cout << items[result[i]] << "," << items[result[j]] << "\n";
+      }
+    }
   }
   else
     cout << "Unable to open config file\n";
