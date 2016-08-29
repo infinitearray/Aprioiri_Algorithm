@@ -1,7 +1,4 @@
 #include<bits/stdc++.h>
-#include <string>
-#include <sstream>
-#include <vector>
 
 using namespace std;
 
@@ -85,6 +82,22 @@ int main()
       }
       cout << "\n";
     }
+    int count[items.size()+1]={0};
+    for(int i=0;i<Dataset.size();i++)
+    {
+      for(int j=0;j<Dataset[i].size();j++)
+      {
+        count[Dataset[i][j]]++;
+      }
+    }
+    cout << "support-->" << support*Dataset.size() << "\n";
+    for(int i=0;i<items.size();i++)
+    {
+      //cout << count[i] << " ";
+      if((float)count[i]>(float)support*Dataset.size())
+        cout << i << " ";
+    }
+    cout << "\n";
   }
   else
     cout << "Unable to open config file\n";
