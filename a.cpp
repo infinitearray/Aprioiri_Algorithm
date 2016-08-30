@@ -2,6 +2,12 @@
 
 using namespace std;
 
+vector< vector<string> > Input; //The main Input dataset
+vector< vector<int> > Dataset;  //The hashed dataset
+vector<string> items;
+vector<int> result;
+float mincount;
+
 void splitter(const string &s, char delim, vector<string> &elems) {
     stringstream ss(s);
     string item;
@@ -16,10 +22,51 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-vector< vector<string> > Input; //The main Input dataset
-vector< vector<int> > Dataset;  //The hashed dataset
-vector<string> items;
-vector<int> result;
+bool IsSubset(std::vector<int> A, std::vector<int> B)
+{
+    std::sort(A.begin(), A.end());
+    std::sort(B.begin(), B.end());
+    return std::includes(A.begin(), A.end(), B.begin(), B.end());
+}
+
+int calc_freq(vector<int> v)
+{
+  int answer=0;
+  for(int i=0;i<Dataset.size();i++)
+  {
+    if(IsSubset(Dataset[i],v))
+      answer++;
+  }
+  return answer;
+}
+
+vector< vector<int> > calc(vector< vector<int> > itemset)
+{
+  vector< vector<int> > answer;
+  for(int i=0;i<itemset.size();i++)
+  {
+    for(int j=i+1;j<itemset.size();j++)
+    {
+      vector<int> s1=itemset[i];//(itemset[i].begin(),itemset[i].end()-2);
+      s1.erase(s1.end()-1);
+      vector<int> s2=itemset[j];//(itemset[j].begin(),itemset[j].end()-2);
+      s2.erase(s2.end()-1);
+      if(s1==s2)
+      {
+        vector<int> temp=s1;
+        temp.push_back(itemset[i][itemset[i].size()-1]);
+        temp.push_back(itemset[j][itemset[j].size()-1]);
+        int freq = calc_freq(temp);
+        if(freq>=mincount)
+        {
+          answer.push_back(temp);
+        }
+      }
+    }
+  }
+  return answer;
+}
+
 
 int main()
 {
@@ -93,17 +140,18 @@ int main()
       }
     }
     cout << "support-->" << support*Dataset.size() << "\n";
-    float mincount=(float)support*Dataset.size();
+    mincount=(float)support*Dataset.size();
+    vector< vector<int> > itemset;
     for(int i=0;i<items.size();i++)
     {
       //cout << count[i] << " ";
       if((float)count[i]>=(float)support*Dataset.size())
       {
-        cout << items[i] << " ";
+        cout << items[i] << "\n";
         result.push_back(i);
       }
     }
-    cout << "\n";
+
     int second[result.size()+1][result.size()+1]={0};
     for(int i=0;i<result.size();i++)
     {
@@ -130,8 +178,30 @@ int main()
       for(int j=0;j<result.size();j++)
       {
         if(second[i][j]>=mincount )
+        {
           cout << items[result[i]] << "," << items[result[j]] << "\n";
+          vector<int> temp;
+          temp.push_back(result[i]);
+          temp.push_back(result[j]);
+          itemset.push_back(temp);
+        }
       }
+    }
+    while(true)
+    {
+      vector< vector<int> > gotanswer=calc(itemset);
+      for(int i=0;i<gotanswer.size();i++)
+      {
+        for(int j=0;j<gotanswer[i].size();j++)
+        {
+          cout << items[gotanswer[i][j]] << " ";
+        }
+        cout << "\n";
+      }
+      if(gotanswer.size()==0)
+        break;
+      itemset.clear();
+      itemset=gotanswer;
     }
   }
   else
