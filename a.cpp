@@ -47,11 +47,11 @@ vector< vector<int> > calc(vector< vector<int> > itemset)
   {
     for(int j=i+1;j<itemset.size();j++)
     {
-      vector<int> s1=itemset[i];//(itemset[i].begin(),itemset[i].end()-2);
+      vector<int> s1=itemset[i];
       s1.erase(s1.end()-1);
-      vector<int> s2=itemset[j];//(itemset[j].begin(),itemset[j].end()-2);
+      vector<int> s2=itemset[j];
       s2.erase(s2.end()-1);
-      if(s1==s2)
+      if((s1.size()==0 && s2.size()==0) || s1==s2)
       {
         vector<int> temp=s1;
         temp.push_back(itemset[i][itemset[i].size()-1]);
@@ -74,7 +74,7 @@ int main()
   int i;
   vector<string> lines;
   float confidence,support,flag;
-  ifstream myfile("config.csv");
+  ifstream myfile("config.csv");  //Read from config file
   if(myfile.is_open())
   {
     i=0;
@@ -94,7 +94,7 @@ int main()
       i++;
     }
     myfile.close();
-    //ifstream inputfile(input.c_str());
+    //ifstream inputfile(input.c_str());  //Read the input file
     ifstream inputfile("TextbookInput.csv");
     if(inputfile.is_open())
     {
@@ -105,14 +105,14 @@ int main()
         for(int i=0;i<lines.size();i++)
         {
           if (find(items.begin(), items.end(), lines[i]) == items.end())
-            items.push_back(lines[i]);
+            items.push_back(lines[i]);  //Make a set of all items in the dataset
         }
         lines.clear();
       }
     }
     else
       cout << "Unable to open input file\n";
-    for(int i=0;i<Input.size();i++)
+    for(int i=0;i<Input.size();i++) //Create the map of the dataset
     {
       vector<int> temp;
       Dataset.push_back(temp);
@@ -132,7 +132,7 @@ int main()
       cout << "\n";
     }
     int count[items.size()+1]={0};
-    for(int i=0;i<Dataset.size();i++)
+    for(int i=0;i<Dataset.size();i++) //Find the count of each item
     {
       for(int j=0;j<Dataset[i].size();j++)
       {
@@ -140,15 +140,14 @@ int main()
       }
     }
     cout << "support-->" << support*Dataset.size() << "\n";
-    mincount=(float)support*Dataset.size();
+    mincount=(float)support*Dataset.size(); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
     for(int i=0;i<items.size();i++)
     {
-      //cout << count[i] << " ";
       if((float)count[i]>=(float)support*Dataset.size())
       {
         cout << items[i] << "\n";
-        result.push_back(i);
+        result.push_back(i);  //Frequent items of length 1
       }
     }
 
@@ -166,7 +165,7 @@ int main()
       {
         for(int k=0;k<Dataset.size();k++)
         {
-          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
           {
             second[i][j]++;
           }
@@ -179,7 +178,7 @@ int main()
       {
         if(second[i][j]>=mincount )
         {
-          cout << items[result[i]] << "," << items[result[j]] << "\n";
+          cout << items[result[i]] << "," << items[result[j]] << "\n";  //Frequent itemsets of length 2
           vector<int> temp;
           temp.push_back(result[i]);
           temp.push_back(result[j]);
@@ -187,7 +186,7 @@ int main()
         }
       }
     }
-    while(true)
+    while(true) //For frequent itemsets of higher lengths
     {
       vector< vector<int> > gotanswer=calc(itemset);
       for(int i=0;i<gotanswer.size();i++)
