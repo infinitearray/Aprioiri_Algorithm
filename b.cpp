@@ -19,7 +19,6 @@ struct node
   int value;
   struct node** children;
 };
-//struct node* Trie = (struct node*)calloc(1, sizeof(struct node));
 
 void splitter(const string &s, char delim, vector<string> &elems) {
     stringstream ss(s);
@@ -34,13 +33,6 @@ vector<string> split(const string &s, char delim) {
     splitter(s, delim, elems);
     return elems;
 }
-/*
-typedef struct Node
-{
-	struct Node **child;
-	int occur;
-	int value;
-}node;*/
 
 struct node *createnode()
 {
@@ -50,7 +42,7 @@ struct node *createnode()
 	{
 		int i;
 		//temp->occur = 0;
-		temp->value = 0;
+		temp->value = -1;
     temp->frequency=0;
 		temp->children = (struct node**)malloc((umap.size()+1)*sizeof(node*));
 		for(i = 0; i <= umap.size(); i++)
@@ -61,56 +53,24 @@ struct node *createnode()
 	return temp;
 };
 
-/*node insert(node *root, vector<vector <int> > x, vector<int> y, int p)
-{
-	node *temp;
-	vector< vector <int> >::iterator introw;
-	vector<int>::iterator intcol;
-	vector<int>::iterator occurite;
-	occurite = y.begin();
-	for(introw=x.begin(); introw != x.end(); introw++)
-	{
-		temp = root;
-		for(intcol = introw->begin(); intcol != introw->end(); intcol++)
-		{
-			if(!temp->child[*intcol])
-			{
-				temp->child[*intcol] = createnode(p);
-			}
-			temp = temp->child[*intcol];
-			temp->value = *intcol;
-		}
-		temp->occur += *occurite;
-		occurite++;
-	}
-	return *root;
-}
-*/
 struct node Insert_word(struct node* Trie, vector<int> word, int frequency)
 {
   struct node* traverse;
   traverse=Trie;
   vector<int>::iterator it;
+  //sort(word.begin(),word.end());
   for(it=word.begin();it!=word.end();it++)
   {
-    //traverse->children = (struct node**)calloc(1+umap.size(),sizeof(int));
     if(!traverse->children[*it])
     {
-      //cout << "Hi\n";
       traverse->children[*it]=createnode();
-      /*traverse->children[word[i]]=(struct node*) calloc(1, sizeof(struct node));
-      traverse->children[word[i]]->value=word[i];
-      traverse->children[word[i]]->parent=traverse;
-      traverse->children[word[i]]->frequency = frequency;
-      vertices++;*/
     }
-    //cout << rmap[traverse->children[word[i]]->value] << "->";
     traverse=traverse->children[*it];
     traverse->value=*it;
+    //cout << *it<< "------\n";
     traverse->frequency=frequency;
   }
   return *Trie;
-  //cout << "\n";
 }
 
 bool IsSubset(std::vector<int> A, std::vector<int> B)
@@ -162,15 +122,16 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
 
 void printer(struct node* Trie)
 {
-  struct node* traverse=Trie;
+  struct node* traverse;
+  traverse=Trie;
   //cout << "Hi\n";
-  if(!traverse)
-    return;
-  cout << rmap[traverse->value] << "\n";
-  unordered_map<string, int>:: iterator itr;
-  for(itr=umap.begin();itr!=umap.end();itr++)
+  //if(!traverse)
+    //return;
+  cout << rmap[traverse->value] << "->";
+  //unordered_map<string, int>:: iterator itr;
+  for(int i=0;i<=16;i++)
   {
-    int i=itr->second;
+    //int i=itr->second;
     //cout << "Hiin\n";
     if(traverse->children[i])
     {
@@ -180,7 +141,7 @@ void printer(struct node* Trie)
     //else
       //printer(traverse->parent);
   }
-  //cout << "is done\n";
+  cout << "\n";
 }
 
 int main()
@@ -217,25 +178,37 @@ int main()
     //ifstream inputfile("inp.csv");
     //support=0.01;
     int counter=0;
+    set<string> items;
     if(inputfile.is_open())
     {
       while(getline(inputfile, line))
       {
         lines = split(line, ',');
+        //sort(lines.begin(),lines.end());
+        // for(int i=0;i<lines.size();i++)
+        //   cout << lines[i] << " ";
+        // cout << "\n";
         Input.push_back(lines);
+        //sort(Input.begin(),Input.end());
         for(int i=0;i<lines.size();i++)
         {
-          if(umap.find(lines[i])==umap.end())
-          {
-            umap[lines[i]]=counter;
-            rmap[counter]=lines[i];
-            counts[counter]++;
-            counter++;
-          }
-           else
-             counts[umap[lines[i]]]++;
+          items.insert(lines[i]);
         }
         lines.clear();
+      }
+      set<string>::iterator its;
+      for(its=items.begin();its!=items.end();its++)
+      {
+        // if(umap.find(lines[i])==umap.end())
+        // {
+          umap[*its]=counter;
+          rmap[counter]=*its;
+          counter++;
+          // counts[counter]++;
+          // counter++;
+        //}
+        //  else
+        //    counts[umap[lines[i]]]++;
       }
     }
     else
@@ -252,19 +225,27 @@ int main()
         Dataset[i][j]+=umap[Input[i][j]];
       }
     }
+    for(int i=0;i<Dataset.size();i++) //Find the count of each item
+    {
+      for(int j=0;j<Dataset[i].size();j++)
+      {
+        counts[Dataset[i][j]]++;
+      }
+    }
     //cout << "support-->" << support*Dataset.size() << "\n";
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
-    for(itr=umap.begin();itr!=umap.end();itr++)
+    //for(itr=umap.begin();itr!=umap.end();itr++)
+    for(int i=0;i<umap.size();i++)
     {
-      if((float)counts[itr->second]>=mincount)
+      if((float)counts[i]>=mincount)
       {
         //cout << itr->first << "\n";
-        result.push_back(itr->second);  //Frequent items of length 1
+        result.push_back(i);  //Frequent items of length 1
         vector< int> temp;
-        temp.push_back(itr->second);
+        temp.push_back(i);
         Solution.push_back(temp);
-        *Trie=Insert_word(Trie, temp, counts[itr->second]);
+        *Trie=Insert_word(Trie, temp, counts[i]);
       }
     }
     itemset.clear();
