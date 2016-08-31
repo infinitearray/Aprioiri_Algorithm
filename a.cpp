@@ -5,6 +5,7 @@ using namespace std;
 vector< vector<string> > Input; //The main Input dataset
 vector< vector<int> > Dataset;  //The hashed dataset
 vector<string> items;
+//set<string> items;
 vector<int> result;
 float mincount;
 
@@ -94,8 +95,10 @@ int main()
       i++;
     }
     myfile.close();
+    support=0.001;
     //ifstream inputfile(input.c_str());  //Read the input file
     ifstream inputfile("TextbookInput.csv");
+    //ifstream inputfile("inp.csv");
     if(inputfile.is_open())
     {
       while(getline(inputfile, line))
@@ -104,6 +107,7 @@ int main()
         Input.push_back(lines);
         for(int i=0;i<lines.size();i++)
         {
+          //items.insert(lines[i]);
           if (find(items.begin(), items.end(), lines[i]) == items.end())
             items.push_back(lines[i]);  //Make a set of all items in the dataset
         }
@@ -127,9 +131,9 @@ int main()
               break;
           }
         }
-        cout << Dataset[i][j] << " ";
+        //cout << Dataset[i][j] << " ";
       }
-      cout << "\n";
+      //cout << "\n";
     }
     int count[items.size()+1]={0};
     for(int i=0;i<Dataset.size();i++) //Find the count of each item
@@ -151,12 +155,16 @@ int main()
       }
     }
 
-    int second[result.size()+1][result.size()+1]={0};
+    //int second[result.size()+1][result.size()+1]={0};
+    vector< vector<int> > second;
+    vector<int> temp;
     for(int i=0;i<result.size();i++)
     {
+      second.push_back(temp);
       for(int j=0;j<result.size();j++)
       {
-        second[i][j]=0;
+        //second[i][j]=0;
+        second[i].push_back(0);
       }
     }
     for(int i=0;i<result.size();i++)
@@ -186,6 +194,8 @@ int main()
         }
       }
     }
+    //cout << items.size() << " " << result.size() << " " << itemset.size() << "\n";
+    //exit(0);
     while(true) //For frequent itemsets of higher lengths
     {
       vector< vector<int> > gotanswer=calc(itemset);

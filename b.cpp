@@ -1,221 +1,216 @@
-/* ==========  ========== ========== ========= */
-//          Trie Tree Data Structure           //
-//                using C++ STL                //
-//                                             //
-//         Functions follow Pascal Case        //
-//           Convention and Variables          //
-//         follow Camel Case Convention        //
-//                                             //
-//            Author - Vamsi Sangam            //
-//            Theory of Programming            //
-/* ========== ========== ========== ========== */
-
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
-
-#define ALPHABETS 26
-#define CASE 'a'
-#define MAX_WORD_SIZE 25
+#include<bits/stdc++.h>
 
 using namespace std;
 
-struct Node
-{
-    struct Node * parent;
-    struct Node * children[ALPHABETS];
-    vector<int> occurrences;
-};
+vector< vector<string> > Input; //The main Input dataset
+vector< vector<int> > Dataset;  //The hashed dataset
+vector<string> items;
+vector<int> result;
+float mincount;
 
-// Inserts a word 'text' into the Trie Tree
-// 'trieTree' and marks it's occurence as 'index'.
-void InsertWord(struct Node * trieTree, char * word, int index)
-{
-    struct Node * traverse = trieTree;
-
-    while (*word != '\0') {     // Until there is something to process
-        if (traverse->children[*word - CASE] == NULL) {
-            // There is no node in 'trieTree' corresponding to this alphabet
-
-            // Allocate using calloc(), so that components are initialised
-            traverse->children[*word - CASE] = (struct Node *) calloc(1, sizeof(struct Node));
-            traverse->children[*word - CASE]->parent = traverse;  // Assigning parent
-        }
-
-        traverse = traverse->children[*word - CASE];
-        ++word; // The next alphabet
-    }
-
-    traverse->occurrences.push_back(index);      // Mark the occurence of the word
-}
-
-// Searches for the occurence of a word in 'trieTree',
-// if not found, returns NULL,
-// if found, returns poniter pointing to the
-// last node of the word in the 'trieTree'
-// Complexity -> O(length_of_word_to_be_searched)
-struct Node * SearchWord(struct Node * treeNode, char * word)
-{
-    // Function is very similar to insert() function
-    while (*word != '\0') {
-        if (treeNode->children[*word - CASE] != NULL) {
-            treeNode = treeNode->children[*word - CASE];
-            ++word;
-        } else {
-            break;
-        }
-    }
-
-    if (*word == '\0' && treeNode->occurrences.size() != 0) {
-        // Word found
-        return treeNode;
-    } else {
-        // Word not found
-        return NULL;
+void splitter(const string &s, char delim, vector<string> &elems) {
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
     }
 }
 
-// Searches the word first, if not found, does nothing
-// if found, deletes the nodes corresponding to the word
-void RemoveWord(struct Node * trieTree, char * word)
-{
-    struct Node * trieNode = SearchWord(trieTree, word);
-
-    if (trieNode == NULL) {
-        // Word not found
-        return;
-    }
-
-    trieNode->occurrences.pop_back();    // Deleting the occurence
-
-    // 'noChild' indicates if the node is a leaf node
-    bool noChild = true;
-
-    int childCount = 0;
-    // 'childCount' has the number of children the current node
-    // has which actually tells us if the node is associated with
-    // another word .This will happen if 'childCount' != 0.
-    int i;
-
-    // Checking children of current node
-    for (i = 0; i < ALPHABETS; ++i) {
-        if (trieNode->children[i] != NULL) {
-            noChild = false;
-            ++childCount;
-        }
-    }
-
-    if (!noChild) {
-        // The node has children, which means that the word whose
-        // occurrence was just removed is a Suffix-Word
-        // So, logically no more nodes have to be deleted
-        return;
-    }
-
-    struct Node * parentNode;     // variable to assist in traversal
-
-    while (trieNode->occurrences.size() == 0 && trieNode->parent != NULL && childCount == 0) {
-        // trieNode->occurrences.size() -> tells if the node is associated with another word
-        //
-        // trieNode->parent != NULL -> is the base case sort-of condition, we simply ran
-        // out of nodes to be deleted, as we reached the root
-        //
-        // childCount -> does the same thing as explained in the beginning, to every node
-        // we reach
-
-        childCount = 0;
-        parentNode = trieNode->parent;
-
-        for (i = 0; i < ALPHABETS; ++i) {
-            if (parentNode->children[i] != NULL) {
-                if (trieNode == parentNode->children[i]) {
-                    // the child node from which we reached
-                    // the parent, this is to be deleted
-                    parentNode->children[i] = NULL;
-                    free(trieNode);
-                    trieNode = parentNode;
-                } else {
-                    ++childCount;
-                }
-            }
-        }
-    }
+vector<string> split(const string &s, char delim) {
+    vector<string> elems;
+    splitter(s, delim, elems);
+    return elems;
 }
 
-// Prints the 'trieTree' in a Pre-Order or a DFS manner
-// which automatically results in a Lexicographical Order
-void LexicographicalPrint(struct Node * trieTree, vector<char> word)
+bool IsSubset(std::vector<int> A, std::vector<int> B)
 {
-    int i;
-    bool noChild = true;
-
-    if (trieTree->occurrences.size() != 0) {
-        // Condition trie_tree->occurrences.size() != 0,
-        // is a neccessary and sufficient condition to
-        // tell if a node is associated with a word or not
-
-        vector<char>::iterator charItr = word.begin();
-
-        while (charItr != word.end()) {
-            printf("%c", *charItr);
-            ++charItr;
-        }
-        printf(" -> @ index -> ");
-
-        vector<int>::iterator counter = trieTree->occurrences.begin();
-        // This is to print the occurences of the word
-
-        while (counter != trieTree->occurrences.end()) {
-            printf("%d, ", *counter);
-            ++counter;
-        }
-
-        printf("\n");
-    }
-
-    for (i = 0; i < ALPHABETS; ++i) {
-        if (trieTree->children[i] != NULL) {
-            noChild = false;
-            word.push_back(CASE + i);   // Select a child
-
-            // and explore everything associated with the cild
-            LexicographicalPrint(trieTree->children[i], word);
-            word.pop_back();
-            // Remove the alphabet as we dealt
-            // everything associated with it
-        }
-    }
-
-    word.pop_back();
+    std::sort(A.begin(), A.end());
+    std::sort(B.begin(), B.end());
+    return std::includes(A.begin(), A.end(), B.begin(), B.end());
 }
+
+int calc_freq(vector<int> v)
+{
+  int answer=0;
+  for(int i=0;i<Dataset.size();i++)
+  {
+    if(IsSubset(Dataset[i],v))
+      answer++;
+  }
+  return answer;
+}
+
+vector< vector<int> > calc(vector< vector<int> > itemset)
+{
+  vector< vector<int> > answer;
+  for(int i=0;i<itemset.size();i++)
+  {
+    for(int j=i+1;j<itemset.size();j++)
+    {
+      vector<int> s1=itemset[i];
+      s1.erase(s1.end()-1);
+      vector<int> s2=itemset[j];
+      s2.erase(s2.end()-1);
+      if((s1.size()==0 && s2.size()==0) || s1==s2)
+      {
+        vector<int> temp=s1;
+        temp.push_back(itemset[i][itemset[i].size()-1]);
+        temp.push_back(itemset[j][itemset[j].size()-1]);
+        int freq = calc_freq(temp);
+        if(freq>=mincount)
+        {
+          answer.push_back(temp);
+        }
+      }
+    }
+  }
+  return answer;
+}
+
 
 int main()
 {
-    int n, i;
-    vector<char> printUtil;       // Utility variable to print tree
-
-    // Creating the Trie Tree using calloc
-    // so that the components are initialised
-    struct Node * trieTree = (struct Node *) calloc(1, sizeof(struct Node));
-    char word[MAX_WORD_SIZE];
-
-    printf("Enter the number of words-\n");
-    scanf("%d", &n);
-
-    for (i = 1; i <= n; ++i) {
-        scanf("%s", word);
-        InsertWord(trieTree, word, i);
+  string temp,line,input,output;
+  int i;
+  vector<string> lines;
+  float confidence,support,flag;
+  ifstream myfile("config.csv");  //Read from config file
+  if(myfile.is_open())
+  {
+    i=0;
+    while(getline(myfile, line))
+    {
+      temp = line.substr(line.find(",")+1,line.length()-1);
+      if(i==0)
+        input=temp;
+      else if(i==1)
+        output=temp;
+      else if(i==2)
+        support=std::atof(temp.c_str());
+      else if(i==3)
+        confidence=std::atof(temp.c_str());
+      else if(i==4)
+        flag=std::atof(temp.c_str());
+      i++;
+    }
+    myfile.close();
+    //ifstream inputfile(input.c_str());  //Read the input file
+    //ifstream inputfile("TextbookInput.csv");
+    ifstream inputfile("inp.csv");
+    support=0.01;
+    if(inputfile.is_open())
+    {
+      while(getline(inputfile, line))
+      {
+        lines = split(line, ',');
+        Input.push_back(lines);
+        for(int i=0;i<lines.size();i++)
+        {
+          if (find(items.begin(), items.end(), lines[i]) == items.end())
+            items.push_back(lines[i]);  //Make a set of all items in the dataset
+        }
+        lines.clear();
+      }
+    }
+    else
+      cout << "Unable to open input file\n";
+    for(int i=0;i<Input.size();i++) //Create the map of the dataset
+    {
+      vector<int> temp;
+      Dataset.push_back(temp);
+      for(int j=0;j<Input[i].size();j++)
+      {
+        Dataset[i].push_back(0);
+        for(int k=0;k<items.size();k++)
+        {
+          if(Input[i][j]==items[k])
+          {
+              Dataset[i][j]+=k;
+              break;
+          }
+        }
+      //  cout << Dataset[i][j] << " ";
+      }
+      //cout << "\n";
+    }
+    int count[items.size()+1]={0};
+    for(int i=0;i<Dataset.size();i++) //Find the count of each item
+    {
+      for(int j=0;j<Dataset[i].size();j++)
+      {
+        count[Dataset[i][j]]++;
+      }
+    }
+    cout << "support-->" << support*Dataset.size() << "\n";
+    mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
+    vector< vector<int> > itemset;
+    for(int i=0;i<items.size();i++)
+    {
+      if((float)count[i]>=mincount)
+      {
+        cout << items[i] << "\n";
+        result.push_back(i);  //Frequent items of length 1
+      }
     }
 
-    printf("\n");   // Just to make the output more readable
-    LexicographicalPrint(trieTree, printUtil);
-
-    printf("\nEnter the Word to be removed - ");
-    scanf("%s", word);
-    RemoveWord(trieTree, word);
-
-    printf("\n");   // Just to make the output more readable
-    LexicographicalPrint(trieTree, printUtil);
-
-    return 0;
+    //int second[result.size()+1][result.size()+1]={0};
+    vector< vector<int> > second;
+    vector<int> temp;
+    for(int i=0;i<result.size();i++)
+    {
+      second.push_back(temp);
+      for(int j=0;j<result.size();j++)
+      {
+        //second[i][j]=0;
+        second[i].push_back(0);
+      }
+    }
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=i+1;j<result.size();j++)
+      {
+        for(int k=0;k<Dataset.size();k++)
+        {
+          //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
+          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          {
+            second[i][j]++;
+          }
+        }
+      }
+    }
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=0;j<result.size();j++)
+      {
+        if(second[i][j]>=mincount )
+        {
+          cout << items[result[i]] << "," << items[result[j]] << "\n";  //Frequent itemsets of length 2
+          vector<int> temp;
+          temp.push_back(result[i]);
+          temp.push_back(result[j]);
+          itemset.push_back(temp);
+        }
+      }
+    }
+    while(true) //For frequent itemsets of higher lengths
+    {
+      vector< vector<int> > gotanswer=calc(itemset);
+      for(int i=0;i<gotanswer.size();i++)
+      {
+        for(int j=0;j<gotanswer[i].size();j++)
+        {
+          cout << items[gotanswer[i][j]] << ",";
+        }
+        cout << "\n";
+      }
+      if(gotanswer.size()==0)
+        break;
+      itemset.clear();
+      itemset=gotanswer;
+    }
+  }
+  else
+    cout << "Unable to open config file\n";
+  return 0;
 }
