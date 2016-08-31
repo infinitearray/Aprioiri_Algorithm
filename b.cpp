@@ -15,9 +15,9 @@ struct node
   int frequency;
   struct node* parent;
   int value;
-  //vector<struct node*> children;
   struct node** children;
 };
+struct node* Trie = (struct node*)calloc(1, sizeof(struct node));
 
 void splitter(const string &s, char delim, vector<string> &elems) {
     stringstream ss(s);
@@ -33,23 +33,24 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-/*void Insert_word(struct node* Trie, vector<int> word, int frequency)
+void Insert_word(struct node* Trie, vector<int> word, int frequency)
 {
   struct node* traverse = Trie;
   for(int i=0;i<word.size();i++)
   {
-    cout << "Hello\n";
-    if(traverse->children[word[i]-traverse->val]==NULL)
+    traverse->children = (struct node**)calloc(2*umap.size(),sizeof(int));
+    if(!traverse->children[word[i]])
     {
-      cout << "Hello\n";
       traverse->children[word[i]]=(struct node*) calloc(1, sizeof(struct node));
-      traverse->val=word[i];
+      traverse->value=word[i];
       traverse->children[word[i]]->parent=traverse;
     }
+    cout << rmap[traverse->value] << "->";
     traverse=traverse->children[word[i]];
   }
+  cout << "\n";
   traverse->frequency = frequency;
-}*/
+}
 
 bool IsSubset(std::vector<int> A, std::vector<int> B)
 {
@@ -89,6 +90,7 @@ vector< vector<int> > calc(vector< vector<int> > itemset)
         if(freq>=mincount)
         {
           answer.push_back(temp);
+          Insert_word(Trie, temp, freq);
         }
       }
     }
@@ -99,12 +101,12 @@ vector< vector<int> > calc(vector< vector<int> > itemset)
 
 int main()
 {
-  struct node* Trie = (struct node*)calloc(1, sizeof(struct node));
+  //struct node* Trie = (struct node*)calloc(1, sizeof(struct node));
   string temp,line,input,output;
   int i;
   vector<string> lines;
   float confidence,support,flag;
-
+  unordered_map<int, int> counts;
 
   ifstream myfile("config.csv");  //Read from config file
   if(myfile.is_open())
@@ -127,9 +129,9 @@ int main()
     }
     myfile.close();
     //ifstream inputfile(input.c_str());  //Read the input file
-    //ifstream inputfile("TextbookInput.csv");
-    ifstream inputfile("inp.csv");
-    support=0.04;
+    ifstream inputfile("TextbookInput.csv");
+    //ifstream inputfile("inp.csv");
+    //support=0.01;
     int counter=0;
     if(inputfile.is_open())
     {
@@ -143,11 +145,11 @@ int main()
           {
             umap[lines[i]]=counter;
             rmap[counter]=lines[i];
-            //count[counter]++;
+            counts[counter]++;
             counter++;
           }
-          // else
-          //   count[umap[lines[i]]]++;
+           else
+             counts[umap[lines[i]]]++;
         }
         lines.clear();
       }
@@ -165,26 +167,18 @@ int main()
         Dataset[i][j]+=umap[Input[i][j]];
       }
     }
-    int count[umap.size()+1]={0};
-    for(int i=0;i<Dataset.size();i++) //Find the count of each item
-    {
-      for(int j=0;j<Dataset[i].size();j++)
-      {
-        count[Dataset[i][j]]++;
-      }
-    }
     cout << "support-->" << support*Dataset.size() << "\n";
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
     for(itr=umap.begin();itr!=umap.end();itr++)
     {
-      if((float)count[itr->second]>=mincount)
+      if((float)counts[itr->second]>=mincount)
       {
         cout << itr->first << "\n";
         result.push_back(itr->second);  //Frequent items of length 1
         vector< int> temp;
         temp.push_back(itr->second);
-      //  Insert_word(Trie, temp, count[i]);
+        Insert_word(Trie, temp, counts[itr->second]);
       }
     }
     itemset.clear();
@@ -223,6 +217,7 @@ int main()
           temp.push_back(result[i]);
           temp.push_back(result[j]);
           itemset.push_back(temp);
+          Insert_word(Trie, temp, second[i][j]);
         }
       }
     }
