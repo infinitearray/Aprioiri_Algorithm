@@ -128,7 +128,10 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
           int check=is_frequent(Trie,tem);
           //cout << rmap[itemset[i][itemset[i].size()-1]] << " " << rmap[itemset[j][itemset[j].size()-1]] << " -> " << check <<"\n";
           if(check==-1)
+          {
             var=-1;
+            break;
+          }
         }
         if(var==0)
         {
@@ -239,11 +242,13 @@ int main()
     }
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
+    unordered_map<int,int> mapping;
     for(int i=0;i<umap.size();i++)
     {
       if((float)counts[i]>=mincount)
       {
         result.push_back(i);  //Frequent items of length 1
+        mapping[i]=result.size()-1;
         //  cout << rmap[i] << "\n";
         vector< int> temp;
         temp.push_back(i);
@@ -262,20 +267,33 @@ int main()
         second[i].push_back(0);
       }
     }
-    for(int i=0;i<result.size();i++)
+    for(int i=0;i<Dataset.size();i++)
     {
-      for(int j=i+1;j<result.size();j++)
+      for(int j=0;j<Dataset[i].size();j++)
       {
-        for(int k=0;k<Dataset.size();k++)
+        for(int k=j+1;k<Dataset[i].size();k++)
         {
-          //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
-          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
           {
-            second[i][j]++;
+            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
           }
         }
       }
     }
+    // for(int i=0;i<result.size();i++)
+    // {
+    //   for(int j=i+1;j<result.size();j++)
+    //   {
+    //     for(int k=0;k<Dataset.size();k++)
+    //     {
+    //       //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
+    //       if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+    //       {
+    //         second[i][j]++;
+    //       }
+    //     }
+    //   }
+    // }
     for(int i=0;i<result.size();i++)
     {
       for(int j=0;j<result.size();j++)
