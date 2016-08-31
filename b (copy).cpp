@@ -1,12 +1,10 @@
 #include<bits/stdc++.h>
-#include<tr1/unordered_map>
+
 using namespace std;
-using namespace tr1;
 
 vector< vector<string> > Input; //The main Input dataset
 vector< vector<int> > Dataset;  //The hashed dataset
-unordered_map<string, int> umap;
-unordered_map<int, string> rmap;
+vector<string> items;
 vector<int> result;
 float mincount;
 
@@ -33,7 +31,7 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-/*void Insert_word(struct node* Trie, vector<int> word, int frequency)
+void Insert_word(struct node* Trie, vector<int> word, int frequency)
 {
   struct node* traverse = Trie;
   for(int i=0;i<word.size();i++)
@@ -49,7 +47,7 @@ vector<string> split(const string &s, char delim) {
     traverse=traverse->children[word[i]];
   }
   traverse->frequency = frequency;
-}*/
+}
 
 bool IsSubset(std::vector<int> A, std::vector<int> B)
 {
@@ -104,7 +102,7 @@ int main()
   int i;
   vector<string> lines;
   float confidence,support,flag;
-
+  unordered_map<string, int> umap;
 
   ifstream myfile("config.csv");  //Read from config file
   if(myfile.is_open())
@@ -127,9 +125,9 @@ int main()
     }
     myfile.close();
     //ifstream inputfile(input.c_str());  //Read the input file
-    //ifstream inputfile("TextbookInput.csv");
-    ifstream inputfile("inp.csv");
-    support=0.04;
+    ifstream inputfile("TextbookInput.csv");
+    //ifstream inputfile("inp.csv");
+    //support=0.01;
     int counter=0;
     if(inputfile.is_open())
     {
@@ -142,19 +140,16 @@ int main()
           if(umap.find(lines[i])==umap.end())
           {
             umap[lines[i]]=counter;
-            rmap[counter]=lines[i];
-            //count[counter]++;
             counter++;
           }
-          // else
-          //   count[umap[lines[i]]]++;
+          /*if (find(items.begin(), items.end(), lines[i]) == items.end())
+            items.push_back(lines[i]);  //Make a set of all items in the dataset*/
         }
         lines.clear();
       }
     }
     else
       cout << "Unable to open input file\n";
-    unordered_map<string, int>:: iterator itr;
     for(int i=0;i<Input.size();i++) //Create the map of the dataset
     {
       vector<int> temp;
@@ -162,10 +157,19 @@ int main()
       for(int j=0;j<Input[i].size();j++)
       {
         Dataset[i].push_back(0);
-        Dataset[i][j]+=umap[Input[i][j]];
+        for(int k=0;k<items.size();k++)
+        {
+          if(Input[i][j]==items[k])
+          {
+              Dataset[i][j]+=k;
+              break;
+          }
+        }
+      //  cout << Dataset[i][j] << " ";
       }
+      //cout << "\n";
     }
-    int count[umap.size()+1]={0};
+    int count[items.size()+1]={0};
     for(int i=0;i<Dataset.size();i++) //Find the count of each item
     {
       for(int j=0;j<Dataset[i].size();j++)
@@ -176,18 +180,19 @@ int main()
     cout << "support-->" << support*Dataset.size() << "\n";
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
-    for(itr=umap.begin();itr!=umap.end();itr++)
+    for(int i=0;i<items.size();i++)
     {
-      if((float)count[itr->second]>=mincount)
+      if((float)count[i]>=mincount)
       {
-        cout << itr->first << "\n";
-        result.push_back(itr->second);  //Frequent items of length 1
+        cout << items[i] << "\n";
+        result.push_back(i);  //Frequent items of length 1
         vector< int> temp;
-        temp.push_back(itr->second);
+        temp.push_back(i);
       //  Insert_word(Trie, temp, count[i]);
       }
     }
     itemset.clear();
+    //int second[result.size()+1][result.size()+1]={0};
     vector< vector<int> > second;
     vector<int> temp;
     for(int i=0;i<result.size();i++)
@@ -195,6 +200,7 @@ int main()
       second.push_back(temp);
       for(int j=0;j<result.size();j++)
       {
+        //second[i][j]=0;
         second[i].push_back(0);
       }
     }
@@ -218,7 +224,7 @@ int main()
       {
         if(second[i][j]>=mincount )
         {
-          cout << rmap[result[i]] << "," << rmap[result[j]] << "\n";  //Frequent itemsets of length 2
+          cout << items[result[i]] << "," << items[result[j]] << "\n";  //Frequent itemsets of length 2
           vector<int> temp;
           temp.push_back(result[i]);
           temp.push_back(result[j]);
@@ -233,7 +239,7 @@ int main()
       {
         for(int j=0;j<gotanswer[i].size();j++)
         {
-          cout << rmap[gotanswer[i][j]] << ",";
+          cout << items[gotanswer[i][j]] << ",";
         }
         cout << "\n";
       }
