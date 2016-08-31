@@ -58,7 +58,6 @@ struct node Insert_word(struct node* Trie, vector<int> word, int frequency)
   struct node* traverse;
   traverse=Trie;
   vector<int>::iterator it;
-  //sort(word.begin(),word.end());
   for(it=word.begin();it!=word.end();it++)
   {
     if(!traverse->children[*it])
@@ -91,9 +90,23 @@ int calc_freq(vector<int> v)
   return answer;
 }
 
+int is_frequent(struct node* Trie, vector<int> vec)
+{
+  struct node* traverse=Trie;
+  for(int k=0;k<vec.size();k++)
+  {
+    if(traverse->children[vec[k]])
+      traverse=traverse->children[vec[k]];
+    else
+      return -1;
+  }
+  return 0;
+}
+
 vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
 {
   vector< vector<int> > answer;
+  int var=0;
   for(int i=0;i<itemset.size();i++)
   {
     for(int j=i+1;j<itemset.size();j++)
@@ -102,17 +115,30 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
       s1.erase(s1.end()-1);
       vector<int> s2=itemset[j];
       s2.erase(s2.end()-1);
-      if((s1.size()==0 && s2.size()==0) || s1==s2)
+      if(s1==s2)
       {
         vector<int> temp=s1;
         temp.push_back(itemset[i][itemset[i].size()-1]);
         temp.push_back(itemset[j][itemset[j].size()-1]);
-        int freq = calc_freq(temp);
-        if(freq>=mincount)
+        var=0;
+        for(int q=0;q<temp.size();q++)
         {
-          answer.push_back(temp);
-          Solution.push_back(temp);
-          *Trie=Insert_word(Trie, temp, freq);
+          vector<int> tem = temp;
+          tem.erase(tem.begin()+q,tem.begin()+q+1);
+          int check=is_frequent(Trie,tem);
+          //cout << rmap[itemset[i][itemset[i].size()-1]] << " " << rmap[itemset[j][itemset[j].size()-1]] << " -> " << check <<"\n";
+          if(check==-1)
+            var=-1;
+        }
+        if(var==0)
+        {
+          int freq = calc_freq(temp);
+          if(freq>=mincount)
+          {
+            answer.push_back(temp);
+            Solution.push_back(temp);
+            *Trie=Insert_word(Trie, temp, freq);
+          }
         }
       }
     }
@@ -120,33 +146,24 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
   return answer;
 }
 
+
 void printer(struct node* Trie)
 {
   struct node* traverse;
   traverse=Trie;
-  //cout << "Hi\n";
-  //if(!traverse)
-    //return;
   cout << rmap[traverse->value] << "->";
-  //unordered_map<string, int>:: iterator itr;
   for(int i=0;i<=16;i++)
   {
-    //int i=itr->second;
-    //cout << "Hiin\n";
     if(traverse->children[i])
     {
-      //cout << "Going to " << rmap[traverse->children[i]->value] << "\n";
       printer(traverse->children[i]);
     }
-    //else
-      //printer(traverse->parent);
   }
   cout << "\n";
 }
 
 int main()
 {
-  //struct node* Trie = (struct node*)calloc(1, sizeof(struct node));
   string temp,line,input,output;
   int i;
   vector<string> lines;
@@ -174,9 +191,9 @@ int main()
     }
     myfile.close();
     //ifstream inputfile(input.c_str());  //Read the input file
-    ifstream inputfile("TextbookInput.csv");
-    //ifstream inputfile("inp.csv");
-    //support=0.01;
+    //ifstream inputfile("TextbookInput.csv");
+    ifstream inputfile("inp.csv");
+    support=0.01;
     int counter=0;
     set<string> items;
     if(inputfile.is_open())
@@ -184,12 +201,7 @@ int main()
       while(getline(inputfile, line))
       {
         lines = split(line, ',');
-        //sort(lines.begin(),lines.end());
-        // for(int i=0;i<lines.size();i++)
-        //   cout << lines[i] << " ";
-        // cout << "\n";
         Input.push_back(lines);
-        //sort(Input.begin(),Input.end());
         for(int i=0;i<lines.size();i++)
         {
           items.insert(lines[i]);
@@ -199,16 +211,9 @@ int main()
       set<string>::iterator its;
       for(its=items.begin();its!=items.end();its++)
       {
-        // if(umap.find(lines[i])==umap.end())
-        // {
           umap[*its]=counter;
           rmap[counter]=*its;
           counter++;
-          // counts[counter]++;
-          // counter++;
-        //}
-        //  else
-        //    counts[umap[lines[i]]]++;
       }
     }
     else
@@ -232,16 +237,14 @@ int main()
         counts[Dataset[i][j]]++;
       }
     }
-    //cout << "support-->" << support*Dataset.size() << "\n";
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
-    //for(itr=umap.begin();itr!=umap.end();itr++)
     for(int i=0;i<umap.size();i++)
     {
       if((float)counts[i]>=mincount)
       {
-        //cout << itr->first << "\n";
         result.push_back(i);  //Frequent items of length 1
+        //  cout << rmap[i] << "\n";
         vector< int> temp;
         temp.push_back(i);
         Solution.push_back(temp);
@@ -279,7 +282,7 @@ int main()
       {
         if(second[i][j]>=mincount )
         {
-          //cout << rmap[result[i]] << "," << rmap[result[j]] << "\n";  //Frequent itemsets of length 2
+        //  cout << rmap[result[i]] << "," << rmap[result[j]] << "\n";  //Frequent itemsets of length 2
           vector<int> temp;
           temp.push_back(result[i]);
           temp.push_back(result[j]);
@@ -315,13 +318,13 @@ int main()
       cout << rmap[Solution[i][Solution[i].size()-1]] << "\n";
     }
     unordered_map<int, string>:: iterator it;
-    for(it=rmap.begin();it!=rmap.end();it++)
-    {
-      cout << it->first << "->" << it->second << "\n";
-    }
-    cout << "***************\n";
+    // for(it=rmap.begin();it!=rmap.end();it++)
+    // {
+    //   cout << it->first << "->" << it->second << "\n";
+    // }
+    //cout << "***************\n";
     /////////To find Association rules
-    printer(Trie);
+    //printer(Trie);
   }
   else
     cout << "Unable to open config file\n";
