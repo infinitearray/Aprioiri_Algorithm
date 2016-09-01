@@ -8,9 +8,16 @@ vector< vector<int> > Dataset;  //The hashed dataset
 unordered_map<string, int> umap;
 unordered_map<int, string> rmap;
 vector<int> result;
-float mincount;
+int mincount;
 int vertices=0;
 vector< vector<int> > Solution;
+
+void print_vector(vector<int> v)
+{
+  for(int i=0;i<v.size();i++)
+    cout << v[i] << " ";
+  cout << "\n";
+}
 
 struct node
 {
@@ -219,7 +226,7 @@ int main()
     //ifstream inputfile(input.c_str());  //Read the input file
     //ifstream inputfile("TextbookInput.csv");
     ifstream inputfile("inp.csv");
-    support=0.01;
+    support=0.001;
     int counter=0;
     set<string> items;
     if(inputfile.is_open())
@@ -272,9 +279,10 @@ int main()
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
     unordered_map<int,int> mapping;
+    result.clear();
     for(int i=0;i<umap.size();i++)
     {
-      if((float)counts[i]>=mincount)
+      if(counts[i]>=mincount)
       {
         result.push_back(i);  //Frequent items of length 1
         mapping[i]=result.size()-1;
@@ -288,6 +296,7 @@ int main()
     itemset.clear();
     vector< vector<int> > second;
     vector<int> temp;
+    temp.clear();
     for(int i=0;i<result.size();i++)
     {
       second.push_back(temp);
@@ -309,7 +318,7 @@ int main()
         }
       }
     }
-
+    
     /**/
 
     // for(int i=0;i<result.size();i++)
@@ -326,11 +335,20 @@ int main()
     //     }
     //   }
     // }
+    // for(int i=0;i<result.size();i++)
+    // {
+    //   for(int j=0;j<result.size();j++)
+    //   {
+    //     cout << second[i][j] << " ";
+    //   }
+    //   cout << "\n";
+    // }
+
     for(int i=0;i<result.size();i++)
     {
-      for(int j=0;j<result.size();j++)
+      for(int j=i+1;j<result.size();j++)
       {
-        if(second[i][j]>=mincount )
+        if(second[i][j]+second[j][i]>=mincount)
         {
         //  cout << rmap[result[i]] << "," << rmap[result[j]] << "\n";  //Frequent itemsets of length 2
           vector<int> temp;
@@ -358,23 +376,17 @@ int main()
       itemset.clear();
       itemset=gotanswer;
     }
-    outputfile << Solution.size() << "\n";
+    cout << Solution.size() << "\n";
     for(int i=0;i<Solution.size();i++)
     {
       for(int j=0;j<Solution[i].size()-1;j++)
       {
-        outputfile << rmap[Solution[i][j]] << ",";
+        cout << rmap[Solution[i][j]] << ",";
       }
-      outputfile << rmap[Solution[i][Solution[i].size()-1]] << "\n";
+      cout << rmap[Solution[i][Solution[i].size()-1]] << "\n";
     }
-    unordered_map<int, string>:: iterator it;
-    // for(it=rmap.begin();it!=rmap.end();it++)
-    // {
-    //   cout << it->first << "->" << it->second << "\n";
-    // }
-    //cout << "***************\n";
+    
     /////////To find Association rules
-    //printer(Trie);
     if(flag==1)
     {
       vector<string> rules;
