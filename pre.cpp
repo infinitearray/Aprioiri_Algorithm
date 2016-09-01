@@ -215,10 +215,11 @@ int main()
       i++;
     }
     myfile.close();
+    ofstream outputfile(output.c_str());
     //ifstream inputfile(input.c_str());  //Read the input file
-    //ifstream inputfile("TextbookInput.csv");
-    ifstream inputfile("inp.csv");
-    support=0.01;
+    ifstream inputfile("TextbookInput.csv");
+    //ifstream inputfile("inp.csv");
+    //support=0.01;
     int counter=0;
     set<string> items;
     if(inputfile.is_open())
@@ -240,6 +241,7 @@ int main()
           rmap[counter]=*its;
           counter++;
       }
+      inputfile.close();
     }
     else
       cout << "Unable to open input file\n";
@@ -353,14 +355,14 @@ int main()
       itemset.clear();
       itemset=gotanswer;
     }
-    cout << Solution.size() << "\n";
+    outputfile << Solution.size() << "\n";
     for(int i=0;i<Solution.size();i++)
     {
       for(int j=0;j<Solution[i].size()-1;j++)
       {
-        cout << rmap[Solution[i][j]] << ",";
+        outputfile << rmap[Solution[i][j]] << ",";
       }
-      cout << rmap[Solution[i][Solution[i].size()-1]] << "\n";
+      outputfile << rmap[Solution[i][Solution[i].size()-1]] << "\n";
     }
     unordered_map<int, string>:: iterator it;
     // for(it=rmap.begin();it!=rmap.end();it++)
@@ -372,6 +374,7 @@ int main()
     //printer(Trie);
     if(flag==1)
     {
+      vector<string> rules;
       for(int i=0;i<Solution.size();i++)
       {
         vector<int> temp=Solution[i];
@@ -395,25 +398,30 @@ int main()
           vector<int>::iterator it;
           float lfreq=(float)get_freq(Trie,subs);
           float freq=(float)get_freq(Trie,temp);
+          string s="";
           if(subs.size()!=0 && nosubs.size()!=0 && freq>=ceil(lfreq*confidence))
           {
             for(it=subs.begin();it!=subs.end()-1;it++)
             {
-              cout << rmap[*it] << ",";
+              s+=rmap[*it]+',';
             }
-            //cout << "->";
-            cout << rmap[*(subs.end()-1)] << " => ";
+            s+=rmap[*(subs.end()-1)]+",=>,";
             for(it=nosubs.begin();it!=nosubs.end()-1;it++)
             {
-              cout << rmap[*it] << ",";
+              s+=rmap[*it]+",";
             }
-            //cout << "\n";
-             cout << rmap[nosubs[nosubs.size()-1]] << "\n";
-             //cout << freq << " " << lfreq << " " << (float)(freq/lfreq) << " " << confidence << "\n";
+             s+=rmap[*(nosubs.end()-1)]+"\n";
+             rules.push_back(s);
           }
         }
       }
+      outputfile << rules.size() << "\n";
+      for(int i=0;i<rules.size();i++)
+      {
+        outputfile << rules[i];
+      }
     }
+    outputfile.close();
   }
   else
     cout << "Unable to open config file\n";
