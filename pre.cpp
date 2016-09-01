@@ -264,12 +264,14 @@ int main()
         Dataset[i][j]+=umap[Input[i][j]];
       }
     }
+    long long int sumsoflens=0;
     for(int i=0;i<Dataset.size();i++) //Find the count of each item
     {
       for(int j=0;j<Dataset[i].size();j++)
       {
         counts[Dataset[i][j]]++;
       }
+      sumsoflens+=Dataset[i].size()*Dataset[i].size();
     }
     // for(int i=0;i<counts.size();i++)
     // {
@@ -305,36 +307,39 @@ int main()
         second[i].push_back(0);
       }
     }
-    for(int i=0;i<Dataset.size();i++)
+    if((long long int)result.size()*result.size() > sumsoflens)
     {
-      for(int j=0;j<Dataset[i].size();j++)
+      for(int i=0;i<Dataset.size();i++)
       {
-        for(int k=j+1;k<Dataset[i].size();k++)
+        for(int j=0;j<Dataset[i].size();j++)
         {
-          if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
+          for(int k=j+1;k<Dataset[i].size();k++)
           {
-            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
+            if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
+            {
+              second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
+            }
           }
         }
       }
     }
-    
-    /**/
-
-    // for(int i=0;i<result.size();i++)
-    // {
-    //   for(int j=i+1;j<result.size();j++)
-    //   {
-    //     for(int k=0;k<Dataset.size();k++)
-    //     {
-    //       //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
-    //       if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
-    //       {
-    //         second[i][j]++;
-    //       }
-    //     }
-    //   }
-    // }
+    else
+    {
+      for(int i=0;i<result.size();i++)
+      {
+        for(int j=i+1;j<result.size();j++)
+        {
+          for(int k=0;k<Dataset.size();k++)
+          {
+            //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
+            if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+            {
+              second[i][j]++;
+            }
+          }
+        }
+      }
+    }
     // for(int i=0;i<result.size();i++)
     // {
     //   for(int j=0;j<result.size();j++)
@@ -356,7 +361,7 @@ int main()
           temp.push_back(result[j]);
           itemset.push_back(temp);
           Solution.push_back(temp);
-          *Trie=Insert_word(Trie, temp, second[i][j]);
+          *Trie=Insert_word(Trie, temp, second[i][j]+second[j][i]);
         }
       }
     }

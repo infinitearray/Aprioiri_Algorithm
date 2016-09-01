@@ -8,7 +8,7 @@ vector< vector<int> > Dataset;  //The hashed dataset
 unordered_map<string, int> umap;
 unordered_map<int, string> rmap;
 vector<int> result;
-float mincount;
+int mincount;
 int vertices=0;
 vector< vector<int> > Solution;
 
@@ -274,7 +274,7 @@ int main()
     unordered_map<int,int> mapping;
     for(int i=0;i<umap.size();i++)
     {
-      if((float)counts[i]>=mincount)
+      if(counts[i]>=mincount)
       {
         result.push_back(i);  //Frequent items of length 1
         mapping[i]=result.size()-1;
@@ -288,6 +288,7 @@ int main()
     itemset.clear();
     vector< vector<int> > second;
     vector<int> temp;
+    temp.clear();
     for(int i=0;i<result.size();i++)
     {
       second.push_back(temp);
@@ -296,41 +297,39 @@ int main()
         second[i].push_back(0);
       }
     }
-    // for(int i=0;i<Dataset.size();i++)
-    // {
-    //   for(int j=0;j<Dataset[i].size();j++)
-    //   {
-    //     for(int k=j+1;k<Dataset[i].size();k++)
-    //     {
-    //       if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
-    //       {
-    //         second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
-    //       }
-    //     }
-    //   }
-    // }
-
-    /**/
-
-    for(int i=0;i<result.size();i++)
+    for(int i=0;i<Dataset.size();i++)
     {
-      for(int j=i+1;j<result.size();j++)
+      for(int j=0;j<Dataset[i].size();j++)
       {
-        for(int k=0;k<Dataset.size();k++)
+        for(int k=j+1;k<Dataset[i].size();k++)
         {
-          //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
-          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
           {
-            second[i][j]++;
+            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
           }
         }
       }
     }
+
+    // for(int i=0;i<result.size();i++)
+    // {
+    //   for(int j=i+1;j<result.size();j++)
+    //   {
+    //     for(int k=0;k<Dataset.size();k++)
+    //     {
+    //       //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
+    //       if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+    //       {
+    //         second[i][j]++;
+    //       }
+    //     }
+    //   }
+    // }
     for(int i=0;i<result.size();i++)
     {
-      for(int j=0;j<result.size();j++)
+      for(int j=i+1;j<result.size();j++)
       {
-        if(second[i][j]>=mincount )
+        if(second[i][j]+second[j][i]>=mincount )
         {
         //  cout << rmap[result[i]] << "," << rmap[result[j]] << "\n";  //Frequent itemsets of length 2
           vector<int> temp;
@@ -338,7 +337,7 @@ int main()
           temp.push_back(result[j]);
           itemset.push_back(temp);
           Solution.push_back(temp);
-          *Trie=Insert_word(Trie, temp, second[i][j]);
+          *Trie=Insert_word(Trie, temp, second[i][j]+second[j][i]);
         }
       }
     }
@@ -402,7 +401,7 @@ int main()
           float lfreq=(float)get_freq(Trie,subs);
           float freq=(float)get_freq(Trie,temp);
           string s="";
-          if(subs.size()!=0 && nosubs.size()!=0 && freq>=ceil(lfreq*confidence))
+          if(subs.size()!=0 && nosubs.size()!=0 && freq>=lfreq*confidence)//freq>=ceil(lfreq*confidence))
           {
             for(it=subs.begin();it!=subs.end()-1;it++)
             {
@@ -425,7 +424,12 @@ int main()
       }
     }
     outputfile.close();
-  }
+    vector<int> lite;
+    lite.push_back(umap["101"]);
+    cout << get_freq(Trie,lite)<<"\n"; 
+    lite.push_back(umap["39"]);
+    cout << get_freq(Trie,lite)<<"\n";
+   }
   else
     cout << "Unable to open config file\n";
   return 0;

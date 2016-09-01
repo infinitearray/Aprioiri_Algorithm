@@ -1,5 +1,5 @@
 input,/home/harsha/Link to Three-1/DWDM/Assignment-1/Aprioiri_Algorithm/input.csv
 output,/home/harsha/Link to Three-1/DWDM/Assignment-1/Aprioiri_Algorithm/output.csv
 support,0.6
-confidence,0.8
-flag,0
+confidence,0.2
+flag,1
