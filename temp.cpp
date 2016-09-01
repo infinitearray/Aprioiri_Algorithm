@@ -20,15 +20,6 @@ struct node
   struct node** children;
 };
 
-void print_vector(vector<int> v)
-{
-  for(int i=0;i<v.size();i++)
-  {
-    cout << v[i] << " ";
-  }
-  cout << "\n";
-}
-
 void splitter(const string &s, char delim, vector<string> &elems) {
     stringstream ss(s);
     string item;
@@ -130,23 +121,11 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
         temp.push_back(itemset[i][itemset[i].size()-1]);
         temp.push_back(itemset[j][itemset[j].size()-1]);
         var=0;
-        for(int z=0;z<temp.size();z++)
-        {
-          cout << rmap[temp[z]] << " ";
-        }
-        cout << "---\n";
         for(int q=0;q<temp.size();q++)
         {
-          var=0;
           vector<int> tem = temp;
           tem.erase(tem.begin()+q,tem.begin()+q+1);
-          for(int z=0;z<tem.size();z++)
-          {
-            cout << rmap[tem[z]] << " ";
-          }
-          cout << "\n";
           int check=is_frequent(Trie,tem);
-          cout << rmap[tem[0]] << " " << rmap[tem[1]] << " " << check << "\n";
           //cout << rmap[itemset[i][itemset[i].size()-1]] << " " << rmap[itemset[j][itemset[j].size()-1]] << " -> " << check <<"\n";
           if(check==-1)
           {
@@ -157,22 +136,11 @@ vector< vector<int> > calc(vector< vector<int> > itemset,struct node* Trie)
         if(var==0)
         {
           int freq = calc_freq(temp);
-          cout << freq << " " << mincount << "\n";
           if(freq>=mincount)
           {
-            // cout << "Hi\n";
-            // for(int z=0;z<temp.size();z++)
-            // {
-            //   cout << rmap[temp[z]] << " ";
-            // }
             answer.push_back(temp);
             Solution.push_back(temp);
-            print_vector(temp);
-            cout << "** " << "\n";
-            print_vector(Solution[Solution.size()-1]);
-
             *Trie=Insert_word(Trie, temp, freq);
-            cout << is_frequent(Trie,temp) << "\n";
           }
         }
       }
@@ -226,9 +194,9 @@ int main()
     }
     myfile.close();
     //ifstream inputfile(input.c_str());  //Read the input file
-    //ifstream inputfile("TextbookInput.csv");
-    ifstream inputfile("inp.csv");
-    support=0.01;
+    ifstream inputfile("TextbookInput.csv");
+    //ifstream inputfile("inp.csv");
+    //support=0.01;
     int counter=0;
     set<string> items;
     if(inputfile.is_open())
@@ -274,13 +242,15 @@ int main()
     }
     mincount=ceil((float)support*Dataset.size()); //The minimum count to be a frequent itemset
     vector< vector<int> > itemset;
-    unordered_map<int,int> mapping;
+    map<int,int> mapping;
+    int varcnt=0;
     for(int i=0;i<umap.size();i++)
     {
       if((float)counts[i]>=mincount)
       {
         result.push_back(i);  //Frequent items of length 1
-        mapping[i]=result.size()-1;
+        mapping[i]=varcnt;
+        varcnt++;
         //  cout << rmap[i] << "\n";
         vector< int> temp;
         temp.push_back(i);
@@ -288,6 +258,17 @@ int main()
         *Trie=Insert_word(Trie, temp, counts[i]);
       }
     }
+    // for(int i=0;i<result.size();i++)
+    // {
+    //   cout << i << ":" << result[i] << " ";
+    // }
+    // cout << "\n";
+    // map<int,int>::iterator itrs;
+    // for(itrs=mapping.begin();itrs!=mapping.end();itrs++)
+    // {
+    //   cout << itrs->first << ":" << itrs->second << " ";
+    // }
+    // cout << "\n";
     itemset.clear();
     vector< vector<int> > second;
     vector<int> temp;
@@ -307,11 +288,13 @@ int main()
         {
           if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
           {
-            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
+            cout << rmap[Dataset[i][j]] << " " << rmap[Dataset[i][k]] << "\n"
+;            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
           }
         }
       }
     }
+    /**/
     // for(int i=0;i<result.size();i++)
     // {
     //   for(int j=i+1;j<result.size();j++)
@@ -342,106 +325,22 @@ int main()
         }
       }
     }
-    // vector<int> harsha;
-    // vector< vector<int> > newv;
-    // harsha.push_back(umap["36"]);
-    // harsha.push_back(umap["48"]);
-    // newv.push_back(harsha);
-    // harsha.pop_back();
-    // harsha.push_back(umap["110"]);
-    // newv.push_back(harsha);
-    // harsha.pop_back();harsha.pop_back();
-    // harsha.push_back(umap["48"]);
-    // harsha.push_back(umap["110"]);
-    // newv.push_back(harsha);
-    // vector< vector<int> > gotanswer=calc(newv,Trie);
     while(true) //For frequent itemsets of higher lengths
     {
-      //vector< vector<int> > gotanswer=calc(itemset,Trie);
-      //////////////
-      vector< vector<int> > answer;
-      int var=0;
-      for(int i=0;i<itemset.size();i++)
-      {
-        for(int j=i+1;j<itemset.size();j++)
-        {
-          vector<int> s1=itemset[i];
-          s1.erase(s1.end()-1);
-          vector<int> s2=itemset[j];
-          s2.erase(s2.end()-1);
-          if(s1==s2)
-          {
-            vector<int> temp=s1;
-            temp.push_back(itemset[i][itemset[i].size()-1]);
-            temp.push_back(itemset[j][itemset[j].size()-1]);
-            var=0;
-            // for(int z=0;z<temp.size();z++)
-            // {
-            //   cout << rmap[temp[z]] << " ";
-            // }
-            // cout << "---\n";
-            for(int q=0;q<temp.size();q++)
-            {
-              //var=0;
-              vector<int> tem = temp;
-              tem.erase(tem.begin()+q,tem.begin()+q+1);
-              // for(int z=0;z<tem.size();z++)
-              // {
-              //   cout << rmap[tem[z]] << " ";
-              // }
-              // cout << "\n";
-              int check=is_frequent(Trie,tem);
-            //  cout << rmap[tem[0]] << " " << rmap[tem[1]] << " " << check << "\n";
-              //cout << rmap[itemset[i][itemset[i].size()-1]] << " " << rmap[itemset[j][itemset[j].size()-1]] << " -> " << check <<"\n";
-              if(check==-1)
-              {
-                var=-1;
-                break;
-              }
-            }
-            if(var==0)
-            {
-              int freq = calc_freq(temp);
-            //  cout << freq << " " << mincount << "\n";
-              if(freq>=mincount)
-              {
-                // cout << "Hi\n";
-                // for(int z=0;z<temp.size();z++)
-                // {
-                //   cout << rmap[temp[z]] << " ";
-                // }
-                answer.push_back(temp);
-                Solution.push_back(temp);
-                // print_vector(temp);
-                // cout << "** " << "\n";
-                // print_vector(Solution[Solution.size()-1]);
-
-                *Trie=Insert_word(Trie, temp, freq);
-              //  cout << is_frequent(Trie,temp) << "\n";
-              }
-            }
-          }
-        }
-      }
-      /////////////
-      if(answer.size()==0)
+      vector< vector<int> > gotanswer=calc(itemset,Trie);
+      // for(int i=0;i<gotanswer.size();i++)
+      // {
+      //   for(int j=0;j<gotanswer[i].size();j++)
+      //   {
+      //     cout << rmap[gotanswer[i][j]] << ",";
+      //   }
+      //   cout << "\n";
+      // }
+      if(gotanswer.size()==0)
         break;
       itemset.clear();
-      itemset=answer;
-      //break;
+      itemset=gotanswer;
     }
-    // int arra[] = {36,48,110};
-    // vector<int> kart(arra,arra+3);
-    // cout << " Hi----> "<< is_frequent(Trie,kart) << "\n";
-    // cout << calc_freq(vector<int> (arra,arra+3)) << "\n";
-    // for(int i=0;i<gotanswer.size();i++)
-    // {
-    //   for(int j=0;j<gotanswer[i].size()-1;j++)
-    //   {
-    //     cout << rmap[gotanswer[i][j]] << ",";
-    //   }
-    //   cout << rmap[gotanswer[i][gotanswer[i].size()-1]] << "\n";
-    // }
     cout << Solution.size() << "\n";
     for(int i=0;i<Solution.size();i++)
     {
@@ -451,14 +350,14 @@ int main()
       }
       cout << rmap[Solution[i][Solution[i].size()-1]] << "\n";
     }
-    /*unordered_map<int, string>:: iterator it;
+    unordered_map<int, string>:: iterator it;
     // for(it=rmap.begin();it!=rmap.end();it++)
     // {
     //   cout << it->first << "->" << it->second << "\n";
     // }
     //cout << "***************\n";
     /////////To find Association rules
-    //printer(Trie);*/
+    //printer(Trie);
   }
   else
     cout << "Unable to open config file\n";
