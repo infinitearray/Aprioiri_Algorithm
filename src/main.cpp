@@ -216,10 +216,10 @@ int main()
     }
     myfile.close();
     ofstream outputfile(output.c_str());
-    //ifstream inputfile(input.c_str());  //Read the input file
+    ifstream inputfile(input.c_str());  //Read the input file
     //ifstream inputfile("TextbookInput.csv");
-    ifstream inputfile("inp.csv");
-    support=0.01;
+    //ifstream inputfile("inp.csv");
+    //support=0.01;
     int counter=0;
     set<string> items;
     if(inputfile.is_open())
@@ -296,36 +296,36 @@ int main()
         second[i].push_back(0);
       }
     }
-    for(int i=0;i<Dataset.size();i++)
-    {
-      for(int j=0;j<Dataset[i].size();j++)
-      {
-        for(int k=j+1;k<Dataset[i].size();k++)
-        {
-          if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
-          {
-            second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
-          }
-        }
-      }
-    }
-
-    /**/
-
-    // for(int i=0;i<result.size();i++)
+    // for(int i=0;i<Dataset.size();i++)
     // {
-    //   for(int j=i+1;j<result.size();j++)
+    //   for(int j=0;j<Dataset[i].size();j++)
     //   {
-    //     for(int k=0;k<Dataset.size();k++)
+    //     for(int k=j+1;k<Dataset[i].size();k++)
     //     {
-    //       //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
-    //       if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+    //       if(counts[Dataset[i][j]]>=mincount && counts[Dataset[i][k]]>=mincount)
     //       {
-    //         second[i][j]++;
+    //         second[mapping[Dataset[i][j]]][mapping[Dataset[i][k]]]++;
     //       }
     //     }
     //   }
     // }
+
+    /**/
+
+    for(int i=0;i<result.size();i++)
+    {
+      for(int j=i+1;j<result.size();j++)
+      {
+        for(int k=0;k<Dataset.size();k++)
+        {
+          //if(IsSubset(Dataset[k],vector<int> (result[i],result[j])))
+          if(find(Dataset[k].begin(), Dataset[k].end(), result[i])!=Dataset[k].end() && find(Dataset[k].begin(), Dataset[k].end(), result[j])!=Dataset[k].end())
+          {
+            second[i][j]++;
+          }
+        }
+      }
+    }
     for(int i=0;i<result.size();i++)
     {
       for(int j=0;j<result.size();j++)
